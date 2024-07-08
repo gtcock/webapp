@@ -1,5 +1,5 @@
 # 使用node作为基础镜像
-FROM python:latest
+FROM node:latest
 
 # 设置工作目录
 WORKDIR /app
