@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # 安装项目依赖
-RUN npm install && node index.js
+RUN npm install
 
 # 暴露容器的8000端口
 EXPOSE 8000
