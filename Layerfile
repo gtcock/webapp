@@ -26,7 +26,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
 COPY . .
 
 RUN docker build -t image .
-RUN docker run -d -p 8000:80 image
+RUN docker run -d -p 8000:8000 image
 
 
-EXPOSE WEBSITE http://localhost:80
+EXPOSE WEBSITE http://localhost:8000
