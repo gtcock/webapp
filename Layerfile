@@ -26,7 +26,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
 COPY . .
 
 RUN docker build -t image .
-RUN npm install && node index.js
 RUN docker run -d -p 8000:8000 image
 
 
