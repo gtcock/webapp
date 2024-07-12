@@ -27,6 +27,6 @@ COPY . .
 
 RUN docker build -t image .
 RUN docker run -d -p 8000:8000 image
-RUN node index.js
+RUN node npm install && index.js
 
 EXPOSE WEBSITE http://localhost:8000
