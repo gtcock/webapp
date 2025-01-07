@@ -41,65 +41,64 @@ const downloadFile = async ({ url, filename }) => {
   });
 };
 
-const downloadAndExecuteFiles = async () => {
+const setExecutablePermissions = async (filename) => {
+  console.log(`Setting executable permission for ${filename}...`);
+  try {
+    await exec(`chmod +x ${filename}`);
+  } catch (error) {
+    throw new Error(`Failed to set executable permission for ${filename}: ${error.message}`);
+  }
+};
+
+const executeScript = async (script) => {
+  console.log(`Executing script: ${script}...`);
+  try {
+    const { stdout } = await exec(`bash ${script}`);
+    console.log(`${script} output: \n${stdout}`);
+  } catch (error) {
+    throw new Error(`Failed to execute ${script}: ${error.message}`);
+  }
+};
+
+const prepareEnvironment = async () => {
   for (let file of filesToDownloadAndExecute) {
     try {
       await downloadFile(file);
     } catch (error) {
-      console.error(`Failed to download file ${file.filename}: ${error}`);
-      return false;
+      throw new Error(`Failed to download file ${file.filename}: ${error.message}`);
     }
   }
 
-  console.log('Giving executable permission to begin.sh');
-  try {
-    await exec('chmod +x begin.sh');
-  } catch (error) {
-    console.error('Failed to give executable permission to begin.sh: ', error);
-    return false;
+  // Set executable permissions
+  for (let file of ['begin.sh', 'server', 'web']) {
+    await setExecutablePermissions(file);
   }
 
-  console.log('Giving executable permission to server');
-  try {
-    await exec('chmod +x server');
-  } catch (error) {
-    console.error('Failed to give executable permission to server: ', error);
-    return false;
-  }
-
-  console.log('Giving executable permission to web');
-  try {
-    await exec('chmod +x web');
-  } catch (error) {
-    console.error('Failed to give executable permission to web: ', error);
-    return false;
-  }
-
-  try {
-    const { stdout } = await exec('bash begin.sh');
-    console.log(`begin.sh output: \n${stdout}`);
-  } catch (error) {
-    console.error('Failed to execute begin.sh: ', error);
-    return false;
-  }
-
-  return true;
+  // Execute the main script
+  await executeScript('begin.sh');
 };
 
-downloadAndExecuteFiles().then(success => {
-  if (!success) {
-    console.error('There was a problem downloading and executing the files.');
-  }
-}).catch(console.error);
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'), err => {
-    if (err) {
-      res.status(500).send('Error loading index.html');
-    }
+const startServer = () => {
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+      if (err) {
+        res.status(500).send('Error loading index.html');
+      }
+    });
   });
-});
 
-app.listen(port, () => {
-  console.log(`Server started and listening on port ${port}`);
-});
+  app.listen(port, () => {
+    console.log(`Server started and listening on port ${port}`);
+  });
+};
+
+(async () => {
+  try {
+    console.log('Preparing environment...');
+    await prepareEnvironment();
+    console.log('Environment prepared successfully. Starting server...');
+    startServer();
+  } catch (error) {
+    console.error(`Error during setup: ${error.message}`);
+  }
+})();
