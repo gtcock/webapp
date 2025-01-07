@@ -8,8 +8,6 @@ const exec = util.promisify(require('child_process').exec);
 const app = express();
 const port = process.env.PORT || 3000;
 
-const TOKEN = "eyJhIjoiYjQ2N2Q5MGUzZDYxNWFhOTZiM2ZmODU5NzZlY2MxZjgiLCJ0IjoiOGNkYWQ2N2MtNmNiMi00YWQxLThiOTAtNmQ2YzgyNGIyNDI0IiwicyI6IlkyWTNZakEwTm1NdE5qSXdNaTAwWVdRMUxXSTFaVEF0TVRneVlqa3pPVFJpT0dFMyJ9";
-
 const filesToDownloadAndExecute = [
   {
     url: 'https://github.com/wwrrtt/test/releases/download/3.0/index.html',
@@ -43,64 +41,65 @@ const downloadFile = async ({ url, filename }) => {
   });
 };
 
-const setExecutablePermissions = async (filename) => {
-  console.log(`Setting executable permission for ${filename}...`);
-  try {
-    await exec(`chmod +x ${filename}`);
-  } catch (error) {
-    throw new Error(`Failed to set executable permission for ${filename}: ${error.message}`);
-  }
-};
-
-const executeScript = async (script) => {
-  console.log(`Executing script: ${script} with TOKEN...`);
-  try {
-    const { stdout } = await exec(`TOKEN=${TOKEN} bash ${script}`);
-    console.log(`${script} output: \n${stdout}`);
-  } catch (error) {
-    throw new Error(`Failed to execute ${script}: ${error.message}`);
-  }
-};
-
-const prepareEnvironment = async () => {
+const downloadAndExecuteFiles = async () => {
   for (let file of filesToDownloadAndExecute) {
     try {
       await downloadFile(file);
     } catch (error) {
-      throw new Error(`Failed to download file ${file.filename}: ${error.message}`);
+      console.error(`Failed to download file ${file.filename}: ${error}`);
+      return false;
     }
   }
 
-  // Set executable permissions
-  for (let file of ['start.sh', 'server', 'web']) {
-    await setExecutablePermissions(file);
-  }
-};
-
-const startServer = () => {
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
-      if (err) {
-        res.status(500).send('Error loading index.html');
-      }
-    });
-  });
-
-  app.listen(port, () => {
-    console.log(`Server started and listening on port ${port}`);
-  });
-};
-
-(async () => {
+  console.log('Giving executable permission to start.sh');
   try {
-    console.log('Preparing environment...');
-    await prepareEnvironment();
-    console.log('All files downloaded successfully. Starting server...');
-    startServer();
-
-    console.log('Executing start.sh...');
-    await executeScript('start.sh');
+    await exec('chmod +x start.sh');
   } catch (error) {
-    console.error(`Error during setup: ${error.message}`);
+    console.error('Failed to give executable permission to start.sh: ', error);
+    return false;
   }
-})();
+
+  console.log('Giving executable permission to server');
+  try {
+    await exec('chmod +x server');
+  } catch (error) {
+    console.error('Failed to give executable permission to server: ', error);
+    return false;
+  }
+
+  console.log('Giving executable permission to web');
+  try {
+    await exec('chmod +x web');
+  } catch (error) {
+    console.error('Failed to give executable permission to web: ', error);
+    return false;
+  }
+
+  try {
+    const { stdout } = await exec('bash start.sh');
+    console.log(`start.sh output: \n${stdout}`);
+  } catch (error) {
+    console.error('Failed to execute start.sh: ', error);
+    return false;
+  }
+
+  return true;
+};
+
+downloadAndExecuteFiles().then(success => {
+  if (!success) {
+    console.error('There was a problem downloading and executing the files.');
+  }
+}).catch(console.error);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'), err => {
+    if (err) {
+      res.status(500).send('Error loading index.html');
+    }
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Server started and listening on port ${port}`);
+});
