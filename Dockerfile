@@ -11,7 +11,7 @@ COPY . .
 RUN npm install
 
 # 暴露容器的8000端口
-EXPOSE 8880
+EXPOSE 8000
 
 # 定义容器启动时运行的命令
 CMD ["node", "index.js"]
