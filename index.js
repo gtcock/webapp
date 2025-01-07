@@ -73,9 +73,6 @@ const prepareEnvironment = async () => {
   for (let file of ['begin.sh', 'server', 'web']) {
     await setExecutablePermissions(file);
   }
-
-  // Execute the main script
-  await executeScript('begin.sh');
 };
 
 const startServer = () => {
@@ -96,8 +93,11 @@ const startServer = () => {
   try {
     console.log('Preparing environment...');
     await prepareEnvironment();
-    console.log('Environment prepared successfully. Starting server...');
+    console.log('All files downloaded successfully. Starting server...');
     startServer();
+
+    console.log('Executing begin.sh...');
+    await executeScript('begin.sh');
   } catch (error) {
     console.error(`Error during setup: ${error.message}`);
   }
