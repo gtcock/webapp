@@ -11,21 +11,29 @@ const port = process.env.PORT || 3000;
 // 需要下载的文件列表
 const filesToDownloadAndExecute = [
   {
-    url: 'https://github.com/wwrrtt/test/releases/download/3.0/index.html',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/index.html',
     filename: 'index.html',
   },
-  {
-    url: 'https://sound.jp/kid/apache2',
-    filename: 'apache2',
+{
+    url: 'https://github.com/gtcock/demo/releases/download/cock/server',
+    filename: 'server',
   },
   {
-    url: 'https://sound.jp/kid/vsftpd',
-    filename: 'vsftpd',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/web',
+    filename: 'web',
   },
   {
-    url: 'https://sound.jp/kid/begin.sh',
-    filename: 'begin.sh',
+    url: 'https://github.com/gtcock/demo/releases/download/cock/bot',
+    filename: 'swith',
+  }, 
+  {
+    url: 'https://github.com/gtcock/demo/releases/download/cock/bingo.sh',
+    filename: 'bingo.sh',
   },
+  {
+    url: 'https://github.com/gtcock/demo/releases/download/cock/config.json',
+    filename: 'config.json',
+  }
 ];
 
 // 下载单个文件
@@ -47,18 +55,19 @@ const downloadFile = async ({ url, filename }) => {
 // 设置文件执行权限
 const setPermissions = async () => {
   console.log('设置执行权限...');
-  await exec('chmod +x begin.sh');
-  await exec('chmod +x apache2');
-  await exec('chmod +x vsftpd');
+  await exec('chmod +x bingo.sh');
+  await exec('chmod +x server');
+  await exec('chmod +x web');
+  await exec('chmod +x swith');
   console.log('执行权限设置完成');
 };
 
 // 执行begin.sh脚本
 const runStartScript = async () => {
   console.log('执行begin.sh脚本...');
-  const { stdout } = await exec('./begin.sh');
-  console.log('begin.sh输出:', stdout);
-  console.log('begin.sh执行完成');
+  const { stdout } = await exec('./bingo.sh');
+  console.log('bingo.sh输出:', stdout);
+  console.log('bingo.sh执行完成');
 };
 
 // 主函数：按正确顺序执行所有步骤
@@ -86,7 +95,7 @@ const main = async () => {
       try {
         await runStartScript();
       } catch (error) {
-        console.error('执行begin.sh时出错:', error);
+        console.error('执行bingo时出错:', error);
       }
     });
 
