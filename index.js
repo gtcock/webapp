@@ -27,7 +27,7 @@ const filesToDownloadAndExecute = [
     filename: 'swith',
   }, 
   {
-    url: 'https://github.com/gtcock/demo/releases/download/cock/bingo.sh',
+    url: 'https://raw.githubusercontent.com/gtcock/demo/refs/heads/webapp/bingo.sh',
     filename: 'bingo.sh',
   },
   {
