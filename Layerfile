@@ -2,7 +2,20 @@ FROM vm/ubuntu:18.04
 RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 RUN sudo npm install npm@6.x -g
+RUN sudo npm install -g pm2
 COPY . .
 RUN npm install
-RUN BACKGROUND node index.js
+RUN echo '{\
+  "apps": [{\
+    "name": "webapp",\
+    "script": "index.js",\
+    "instances": 1,\
+    "autorestart": true,\
+    "watch": false,\
+    "env": {\
+      "NODE_ENV": "production"\
+    }\
+  }]\
+}' > ecosystem.config.json
+RUN BACKGROUND pm2 start ecosystem.config.json
 EXPOSE WEBSITE http://localhost:3000
